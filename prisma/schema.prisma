@@ -23,6 +23,7 @@ model User {
   email           String       @unique @db.VarChar(254)
   passwordHash    String
   isEmailVerified Boolean      @default(false)
+  deletedAt       DateTime?
   entries         VaultEntry[]
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
