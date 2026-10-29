@@ -1,0 +1,10 @@
+# Dependencies
+node_modules/
+
+# Prisma generated clients
+/generated/prisma/
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
