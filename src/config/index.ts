@@ -12,5 +12,10 @@ export default {
   jwt_refresh_secret: process.env.JWT_REFRESH_SECRET!,
   jwt_access_expires_in: process.env.JWT_ACCESS_EXPIRES_IN!,
   jwt_refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN!,
+  upstash_redis_rest_url: process.env.UPSTASH_REDIS_REST_URL!,
+  upstash_redis_rest_token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  smtp_user: process.env.SMTP_USER!,
+  smtp_email_sender: process.env.SMTP_EMAIL_SENDER!,
+  smtp_password: process.env.SMTP_PASSWORD!,
   
 };

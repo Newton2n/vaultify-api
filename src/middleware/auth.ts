@@ -12,6 +12,7 @@ declare global {
         id: string;
         name: string;
         email: string;
+        isEmailVerified: boolean;
       };
     }
   }
@@ -63,6 +64,7 @@ const auth = () => {
         id: true,
         name: true,
         email: true,
+        isEmailVerified: true,
       },
     });
 
@@ -75,6 +77,7 @@ const auth = () => {
       id: user.id,
       name: user.name,
       email: user.email,
+      isEmailVerified: user.isEmailVerified,
     };
 
     next();
