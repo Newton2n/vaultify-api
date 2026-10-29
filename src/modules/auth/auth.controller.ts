@@ -3,6 +3,7 @@ import catchAsync from "../../utils/catch-async";
 import { authService } from "./auth.service";
 import { sendSuccessResponse } from "../../utils/response";
 import { StatusCodes } from "http-status-codes";
+import { AppError } from "../../utils/app-error";
 
 //register user
 const register = catchAsync(
@@ -98,9 +99,53 @@ const refreshToken = catchAsync(
   },
 );
 
+//send verification email
+const sendVerificationEmail = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userEmail = req.user?.email;
+        if (!userEmail) {
+            throw new AppError(
+                StatusCodes.BAD_REQUEST,
+                "User email is missing in the request. Please log in again.",
+            );
+        }
+        await authService.sendVerificationEmail(req.body,userEmail);
+
+        sendSuccessResponse(res, {
+            statusCode: StatusCodes.OK,
+            message:
+                "If the account exists and is not verified, a verification code has been sent.",
+            data: null,
+        });
+    },
+);
+
+//verify email
+const verifyEmail = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userEmail = req.user?.email;
+        if (!userEmail) {
+            throw new AppError(
+                StatusCodes.BAD_REQUEST,
+                "User email is missing in the request. Please log in again.",
+            );
+        }
+        const result = await authService.verifyEmail(req.body, userEmail);
+
+        sendSuccessResponse(res, {
+            statusCode: StatusCodes.OK,
+            message: "Email verified successfully.",
+            data: result,
+        });
+    },
+);
+
+
 export const authController = {
   register,
   login,
   getMe,
   refreshToken,
+  sendVerificationEmail,
+  verifyEmail,
 };
