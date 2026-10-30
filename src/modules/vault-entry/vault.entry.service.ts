@@ -61,10 +61,14 @@ const getAll = async (userId: string, queryPayload: TVaultEntrySearchQuery) => {
     ];
   }
 
+  // Exclude soft-deleted entries
+  whereClause.deletedAt = null;
+
   const orderBy = {
     [sortBy]: sortOrder,
   };
 
+  // Get total count and paginated entries in a single transaction
   const [totalRow, entries] = await prisma.$transaction([
     prisma.vaultEntry.count({
       where: whereClause,
@@ -94,6 +98,7 @@ const getById = async (userId: string, entryId: string) => {
     where: {
       id: entryId,
       userId,
+      deletedAt: null,
     },
   });
 
@@ -114,6 +119,7 @@ const update = async (
     where: {
       id: entryId,
       userId,
+      deletedAt: null,
     },
     select: {
       id: true,
@@ -142,9 +148,12 @@ const remove = async (userId: string, entryId: string) => {
     },
   });
 
-  const deletedEntry = await prisma.vaultEntry.delete({
+  const deletedEntry = await prisma.vaultEntry.update({
     where: {
       id: existingEntry.id,
+    },
+    data: {
+      deletedAt: new Date(),
     },
   });
 

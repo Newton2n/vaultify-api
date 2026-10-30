@@ -31,7 +31,7 @@ const auth = () => {
     if (!accessToken) {
       throw new AppError(
         401,
-        "You are not logged in. Please log in to access this resource."
+        "You are not logged in. Please log in to access this resource.",
       );
     }
 
@@ -60,7 +60,7 @@ const auth = () => {
 
     //  Verify user existence in database
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: { id, deletedAt: null },
       select: {
         id: true,
         name: true,
