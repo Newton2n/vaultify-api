@@ -109,6 +109,7 @@ const sendVerificationEmail = catchAsync(
                 "User email is missing in the request. Please log in again.",
             );
         }
+        console.log("userEmail", userEmail);
         await authService.sendVerificationEmail(req.body,userEmail);
 
         sendSuccessResponse(res, {

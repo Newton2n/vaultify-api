@@ -1,5 +1,10 @@
 import { prisma } from "../../lib/prisma";
-import { TLoginPayload, TRegistrationPayload, TSendVerificationEmail, TVerifyEmail } from "./auth.schema";
+import {
+  TLoginPayload,
+  TRegistrationPayload,
+  TSendVerificationEmail,
+  TVerifyEmail,
+} from "./auth.schema";
 import bcrypt from "bcryptjs";
 import config from "../../config";
 import { jwtUtils } from "../../utils/jwt";
@@ -118,16 +123,17 @@ const refreshToken = async (refreshToken: string) => {
   return { accessToken, jwtPayload };
 };
 
+//send verification email
 const sendVerificationEmail = async (
   payload: TSendVerificationEmail,
   loginUserEmail: string,
 ) => {
   const email = payload.email.trim().toLowerCase();
-  if(email !== loginUserEmail) {
-	throw new AppError(
-	  StatusCodes.FORBIDDEN,
-	  "You can only send verification email to your own email address.",
-	);
+  if (email !== loginUserEmail) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "You can only send verification email to your own email address.",
+    );
   }
 
   const user = await prisma.user.findUnique({
@@ -137,7 +143,7 @@ const sendVerificationEmail = async (
     },
   });
 
-  // Don't reveal whether the email exists.
+  // Not revealing whether the email exists.
   if (!user) {
     return;
   }
@@ -152,11 +158,13 @@ const sendVerificationEmail = async (
 
   const VERIFY_EMAIL_OTP_EXPIRY = 60 * 5; // 5 minutes
 
-  const redisKey = `orbrin:email-verification-otp:${user.id}`;
+  const redisKey = `vaulty:email-verification-otp:${user.id}`;
 
   await redis.set(redisKey, hashedOtp, {
     ex: VERIFY_EMAIL_OTP_EXPIRY,
   });
+
+  console.log("Sent OTP:", await redis.get(redisKey));
 
   await mailService.sendEmailVerificationOtpEmail({
     to: user.email,
@@ -165,14 +173,15 @@ const sendVerificationEmail = async (
   });
 };
 
+//verify email
 const verifyEmail = async (payload: TVerifyEmail, loginUserEmail: string) => {
   const email = payload.email.trim().toLowerCase();
 
-  if(email !== loginUserEmail) {
-	throw new AppError(
-	  StatusCodes.FORBIDDEN,
-	  "You can only verify your own email address.",
-	);
+  if (email !== loginUserEmail) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "You can only verify your own email address.",
+    );
   }
 
   const user = await prisma.user.findUnique({
@@ -195,11 +204,17 @@ const verifyEmail = async (payload: TVerifyEmail, loginUserEmail: string) => {
     .update(payload.otp)
     .digest("hex");
 
-  const redisKey = `orbrin:email-verification-otp:${user.id}`;
+  const redisKey = `vaulty:email-verification-otp:${user.id}`;
 
   const storedOtp = await redis.get<string>(redisKey);
 
-  if (!storedOtp || storedOtp !== hashedOtp) {
+  console.log("stored otp", storedOtp);
+
+  if (!storedOtp) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Invalid or expired OTP.");
+  }
+
+  if (storedOtp !== hashedOtp) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Invalid or expired OTP.");
   }
 
@@ -208,15 +223,13 @@ const verifyEmail = async (payload: TVerifyEmail, loginUserEmail: string) => {
       id: user.id,
     },
     data: {
-      emailVerified: true,
+      isEmailVerified: true,
     },
     select: {
       id: true,
       email: true,
-      fullName: true,
-      emailVerified: true,
-      status: true,
-      authProvider: true,
+      name: true,
+      isEmailVerified: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -228,6 +241,11 @@ const verifyEmail = async (payload: TVerifyEmail, loginUserEmail: string) => {
   return updatedUser;
 };
 
-
-
-export const authService = { register, login, getMe, refreshToken, sendVerificationEmail, verifyEmail };
+export const authService = {
+  register,
+  login,
+  getMe,
+  refreshToken,
+  sendVerificationEmail,
+  verifyEmail,
+};

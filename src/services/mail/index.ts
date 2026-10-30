@@ -19,7 +19,6 @@ const renderTemplate = async (
 	const templatePath = path.join(
 		process.cwd(),
 		"src",
-		"app",
 		"services",
 		"mail",
 		"templates",
