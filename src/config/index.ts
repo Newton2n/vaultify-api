@@ -17,5 +17,6 @@ export default {
   smtp_user: process.env.SMTP_USER!,
   smtp_email_sender: process.env.SMTP_EMAIL_SENDER!,
   smtp_password: process.env.SMTP_PASSWORD!,
+  encryption_key: process.env.ENCRYPTION_KEY!,
   
 };

@@ -164,7 +164,6 @@ const sendVerificationEmail = async (
     ex: VERIFY_EMAIL_OTP_EXPIRY,
   });
 
-  console.log("Sent OTP:", await redis.get(redisKey));
 
   await mailService.sendEmailVerificationOtpEmail({
     to: user.email,
@@ -208,7 +207,6 @@ const verifyEmail = async (payload: TVerifyEmail, loginUserEmail: string) => {
 
   const storedOtp = await redis.get<string>(redisKey);
 
-  console.log("stored otp", storedOtp);
 
   if (!storedOtp) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Invalid or expired OTP.");

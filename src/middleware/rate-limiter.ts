@@ -19,8 +19,6 @@ const rateLimiter = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-
-
     // Determine the client's IP address
     const forwardedFor = req.headers["x-forwarded-for"];
     const realIp = req.headers["x-real-ip"];
@@ -68,8 +66,6 @@ const rateLimiter = async (
 
     next();
   } catch (error) {
-    console.error("Rate limiter error:", error);
-
     // In case of an error, allow the request to proceed
     next();
   }
