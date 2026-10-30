@@ -6,6 +6,7 @@ import vaultEntryRoute from "./modules/vault-entry/vault.entry.route";
 import globalError from "./middleware/global-error";
 import { userRoutes } from "./modules/user/user.route";
 import rateLimiter from "./middleware/rate-limiter";
+import notFound from "./middleware/not-found";
 
 const app: Application = express();
 
@@ -26,5 +27,6 @@ app.use("/api/v1/vault", vaultEntryRoute);
 
 
 app.use(globalError);
+app.use(notFound);
 
 export default app;
