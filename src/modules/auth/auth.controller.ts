@@ -59,7 +59,10 @@ const getMe = catchAsync(
     const user = req.user;
 
     if (!user?.id) {
-      throw new Error("Can not fetch user please log in again");
+      throw new AppError(
+        StatusCodes.UNAUTHORIZED,
+        "Can not fetch user please log in again",
+      );
     }
     const result = await authService.getMe(user?.id);
     sendSuccessResponse(res, {
@@ -75,7 +78,10 @@ const refreshToken = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { refreshToken } = req.cookies;
     if (!refreshToken) {
-      throw new Error("Sorry You Are Logged Out Please Log In Again");
+      throw new AppError(
+        StatusCodes.UNAUTHORIZED,
+        "Sorry You Are Logged Out Please Log In Again",
+      );
     }
 
     const { accessToken, jwtPayload } =
@@ -101,46 +107,58 @@ const refreshToken = catchAsync(
 
 //send verification email
 const sendVerificationEmail = catchAsync(
-    async (req: Request, res: Response, next: NextFunction) => {
-        const userEmail = req.user?.email;
-        if (!userEmail) {
-            throw new AppError(
-                StatusCodes.BAD_REQUEST,
-                "User email is missing in the request. Please log in again.",
-            );
-        }
-        
-        await authService.sendVerificationEmail(req.body,userEmail);
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    if (!user) {
+      throw new AppError(
+        StatusCodes.BAD_REQUEST,
+        "User is not authenticated. Please log in again.",
+      );
+    }
 
-        sendSuccessResponse(res, {
-            statusCode: StatusCodes.OK,
-            message:
-                "If the account exists and is not verified, a verification code has been sent.",
-            data: null,
-        });
-    },
+    if (user.isEmailVerified) {
+      throw new AppError(StatusCodes.BAD_REQUEST, "Email is already verified.");
+    }
+
+    await authService.sendVerificationEmail(user.email, user.id, user.name);
+
+    sendSuccessResponse(res, {
+      statusCode: StatusCodes.OK,
+      message:
+        "Email verification OTP sent successfully. Please check your email.",
+      data: null,
+    });
+  },
 );
 
 //verify email
 const verifyEmail = catchAsync(
-    async (req: Request, res: Response, next: NextFunction) => {
-        const userEmail = req.user?.email;
-        if (!userEmail) {
-            throw new AppError(
-                StatusCodes.BAD_REQUEST,
-                "User email is missing in the request. Please log in again.",
-            );
-        }
-        const result = await authService.verifyEmail(req.body, userEmail);
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    if (!user) {
+      throw new AppError(
+        StatusCodes.BAD_REQUEST,
+        "User is missing in the request. Please log in again.",
+      );
+    }
 
-        sendSuccessResponse(res, {
-            statusCode: StatusCodes.OK,
-            message: "Email verified successfully.",
-            data: result,
-        });
-    },
+    if (user.isEmailVerified) {
+      throw new AppError(StatusCodes.BAD_REQUEST, "Email is already verified.");
+    }
+
+    if (!req.body.otp) {
+      throw new AppError(StatusCodes.BAD_REQUEST, "OTP is required.");
+    }
+
+    const result = await authService.verifyEmail(user.id, req.body.otp);
+
+    sendSuccessResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: "Email verified successfully.",
+      data: result,
+    });
+  },
 );
-
 
 export const authController = {
   register,

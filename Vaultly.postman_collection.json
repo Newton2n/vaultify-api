@@ -7,7 +7,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:5000/api/v1"
+      "value": "https://vaultify-api-five.vercel.app/api/v1"
     },
     {
       "key": "accessToken",
@@ -19,7 +19,7 @@
     },
     {
       "key": "userEmail",
-      "value": "newton@example.com"
+      "value": "demoemail@example.com"
     },
     {
       "key": "verificationOtp",
@@ -46,7 +46,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Newton Bepari\",\n  \"email\": \"newton@example.com\",\n  \"password\": \"TestPass123!\"\n}"
+              "raw": "{\n  \"name\": \"Demo User\",\n  \"email\": \"demoemail@example.com\",\n  \"password\": \"TestPass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": "{{baseUrl}}/auth/register"
           }
@@ -79,7 +84,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"newton@example.com\",\n  \"password\": \"TestPass123!\"\n}"
+              "raw": "{\n  \"email\": \"demoemail@example.com\",\n  \"password\": \"TestPass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": "{{baseUrl}}/auth/login"
           }
@@ -116,18 +126,10 @@
             "method": "POST",
             "header": [
               {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
                 "key": "Authorization",
                 "value": "Bearer {{accessToken}}"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"{{userEmail}}\"\n}"
-            },
             "url": "{{baseUrl}}/auth/send-verification-email"
           }
         },
@@ -147,7 +149,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"otp\": \"{{verificationOtp}}\"\n}"
+              "raw": "{\n  \"otp\": \"{{verificationOtp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": "{{baseUrl}}/auth/verify-email"
           }
@@ -169,7 +176,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{userEmail}}\"\n}"
+              "raw": "{\n  \"email\": \"{{userEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": "{{baseUrl}}/users/forgot-password"
           }
@@ -186,7 +198,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"otp\": \"{{resetOtp}}\",\n  \"newPassword\": \"NewSecurePass123!\"\n}"
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"otp\": \"{{resetOtp}}\",\n  \"newPassword\": \"NewSecurePass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": "{{baseUrl}}/users/reset-password"
           }
@@ -207,7 +224,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Newton Bepari\"\n}"
+              "raw": "{\n  \"name\": \"Demo User\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": "{{baseUrl}}/users/me"
           }
@@ -228,7 +250,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"currentPassword\": \"TestPass123!\",\n  \"newPassword\": \"NewSecurePass123!\"\n}"
+              "raw": "{\n  \"currentPassword\": \"TestPass123!\",\n  \"newPassword\": \"NewSecurePass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": "{{baseUrl}}/users/me/password"
           }
@@ -283,7 +310,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"GitHub Profile\",\n  \"category\": \"LINK\",\n  \"value\": \"https://github.com/Newton2n\",\n  \"description\": \"My GitHub profile\",\n  \"tags\": [\"github\", \"portfolio\"],\n  \"isSensitive\": false\n}"
+              "raw": "{\n  \"title\": \"GitHub Profile\",\n  \"category\": \"LINK\",\n  \"value\": \"https://github.com/demo\",\n  \"description\": \"My GitHub profile\",\n  \"tags\": [\"github\", \"portfolio\"],\n  \"isSensitive\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": "{{baseUrl}}/vault"
           }
@@ -312,12 +344,8 @@
                   "value": "10"
                 },
                 {
-                  "key": "sortBy",
-                  "value": "createdAt"
-                },
-                {
-                  "key": "sortOrder",
-                  "value": "desc"
+                  "key": "size",
+                  "value": "10"
                 }
               ]
             }
@@ -351,8 +379,12 @@
               }
             ],
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Updated GitHub Profile\",\n  \"tags\": [\"github\", \"developer\"],\n  \"isSensitive\": false\n}"
+              "raw": "{\n  \"title\": \"Updated GitHub Profile\",\n  \"tags\": [\"github\", \"developer\"],\n  \"isSensitive\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": "{{baseUrl}}/vault/{{vaultEntryId}}"
           }

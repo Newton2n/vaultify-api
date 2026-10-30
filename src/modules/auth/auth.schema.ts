@@ -15,15 +15,10 @@ export const userRegisterSchema = z.object({
   }),
 });
 
-export const sendVerificationEmailValidationSchema = z.object({
-	body: z.object({
-		email: z.email("Invalid email address."),
-	}),
-});
+
 
 export const verifyEmailValidationSchema = z.object({
 	body: z.object({
-		email: z.email("Invalid email address."),
 		otp: z.string().regex(/^\d{6}$/, "OTP must be a 6-digit number."),
 	}),
 });
@@ -36,6 +31,5 @@ export type TSendVerificationEmail = {
   email: string;
 };
 export type TVerifyEmail = {
-  email: string;
   otp: string;
 };

@@ -6,6 +6,7 @@ import {
 } from "node:crypto";
 
 import config from "../config";
+import { AppError } from "./app-error";
 
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 12;
@@ -14,7 +15,7 @@ const AUTH_TAG_LENGTH = 16;
 const encryptionKey = config.encryption_key;
 
 if (!encryptionKey || !/^[0-9a-fA-F]{64}$/.test(encryptionKey)) {
-  throw new Error("Invalid encryption key");
+  throw new AppError(400, "Invalid encryption key");
 }
 
 const key = Buffer.from(encryptionKey, "hex");
@@ -43,7 +44,7 @@ export const decrypt = (value: string): string => {
   const [version, encryptedData] = value.split(":");
 
   if (version !== "v1" || !encryptedData) {
-    throw new Error("Invalid encrypted data");
+    throw new AppError(400, "Invalid encrypted data");
   }
 
   const data = Buffer.from(encryptedData, "base64");

@@ -45,7 +45,7 @@ const login = async (payload: TLoginPayload) => {
     user?.passwordHash!,
   );
   if (!checkPassword) {
-    throw new Error("Invalid Credential");
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Invalid Credential");
   }
 
   const jwtPayload = {
@@ -96,7 +96,7 @@ const refreshToken = async (refreshToken: string) => {
   );
 
   if (!verifyToken.data) {
-    throw new Error(verifyToken.error);
+    throw new AppError(StatusCodes.UNAUTHORIZED, verifyToken.error);
   }
 
   const user = await prisma.user.findUniqueOrThrow({
@@ -125,88 +125,39 @@ const refreshToken = async (refreshToken: string) => {
 
 //send verification email
 const sendVerificationEmail = async (
-  payload: TSendVerificationEmail,
-  loginUserEmail: string,
+  email: string,
+  userId: string,
+  userName: string,
 ) => {
-  const email = payload.email.trim().toLowerCase();
-  if (email !== loginUserEmail) {
-    throw new AppError(
-      StatusCodes.FORBIDDEN,
-      "You can only send verification email to your own email address.",
-    );
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      email,
-      deletedAt: null,
-    },
-  });
-
-  // Not revealing whether the email exists.
-  if (!user) {
-    return;
-  }
-
-  if (user.isEmailVerified) {
-    return;
-  }
-
   const otp = crypto.randomInt(100000, 1000000).toString();
 
   const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
   const VERIFY_EMAIL_OTP_EXPIRY = 60 * 5; // 5 minutes
 
-  const redisKey = `vaulty:email-verification-otp:${user.id}`;
+  const redisKey = `vaulty:email-verification-otp:${userId}`;
 
   await redis.set(redisKey, hashedOtp, {
     ex: VERIFY_EMAIL_OTP_EXPIRY,
   });
 
-
   await mailService.sendEmailVerificationOtpEmail({
-    to: user.email,
-    name: user.name,
+    to: email,
+    name: userName,
     otp,
   });
 };
 
 //verify email
-const verifyEmail = async (payload: TVerifyEmail, loginUserEmail: string) => {
-  const email = payload.email.trim().toLowerCase();
+const verifyEmail = async (
+  userId: string,
+  otp: string,
+) => {
+  const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
-  if (email !== loginUserEmail) {
-    throw new AppError(
-      StatusCodes.FORBIDDEN,
-      "You can only verify your own email address.",
-    );
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      email,
-      deletedAt: null,
-    },
-  });
-
-  if (!user) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "Invalid email or OTP.");
-  }
-
-  if (user.isEmailVerified) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "Email is already verified.");
-  }
-
-  const hashedOtp = crypto
-    .createHash("sha256")
-    .update(payload.otp)
-    .digest("hex");
-
-  const redisKey = `vaulty:email-verification-otp:${user.id}`;
+  const redisKey = `vaulty:email-verification-otp:${userId}`;
 
   const storedOtp = await redis.get<string>(redisKey);
-
 
   if (!storedOtp) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Invalid or expired OTP.");
@@ -218,7 +169,7 @@ const verifyEmail = async (payload: TVerifyEmail, loginUserEmail: string) => {
 
   const updatedUser = await prisma.user.update({
     where: {
-      id: user.id,
+      id: userId,
     },
     data: {
       isEmailVerified: true,

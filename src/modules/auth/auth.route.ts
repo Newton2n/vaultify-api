@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authController } from "./auth.controller";
 import { authMiddleware } from "../../middleware/auth";
-import { sendVerificationEmailValidationSchema, verifyEmailValidationSchema } from "./auth.schema";
+import { verifyEmailValidationSchema } from "./auth.schema";
 import { validate } from "../../middleware/validate";
 
 const authRoute = Router();
@@ -24,7 +24,6 @@ authRoute.post("/refresh-token", authController.refreshToken);
 authRoute.post(
   "/send-verification-email",
   authMiddleware.auth(),
-  validate(sendVerificationEmailValidationSchema),
   authController.sendVerificationEmail,
 );
 
